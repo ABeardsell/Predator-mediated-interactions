@@ -2,6 +2,7 @@ library(RColorBrewer)
 library(deSolve)
 library(pse)
 library(MCMCglmm) #truncated normal distribution
+library(MASS)
 
 #--------------------------------------------------------------------
 # MSFR parameters
@@ -76,8 +77,6 @@ list(data=Te1_dist),list(data=e1_dist),list(data=To1_dist),list(data=o1_dist),li
 list(data=Tm2_dist),list(data=f42_ua_dist),list(data=f42_a_dist),list(data=p_c_ua_dist),list(data=p_c_a_dist)
 ,list(min=0.965,max=0.993),list(min=0.015,max=0.059),list(data=Tm3_dist))
 
-
-
 ##########################################################################################################
 mod_MSFR_global <- function (hr,phi,s,f21_f31,Tp1,Te1,e1,To1,o1,Tde1,de1,f41,f22_ua,f32_a,Tp2,Tm2,f42_ua,f42_a,p_c_ua,p_c_a,w,f23,Tm3){
     NS <- array();
@@ -115,205 +114,61 @@ modelRun_MSFR_global <- function (my.data) {
 
 
 N2=255
-#N2 <- seq(from=0,to=800,by=200) ## Range - Goose Nest Density (square km)
 res.names <- paste("N2",N2) ##give colnames (which will be used in the plots below)
-## Run the model
 
+## Run the model
 myLHS <- LHS(modelRun_MSFR_global,factors_global,1000, q_global, q.arg_global, res.names, nboot=40) # Latin Hypercube sampling (LHS)
-myLHS
 dfdata <- as.data.frame(get.data(myLHS)) # values of parameters used in simulation
 df1 <- as.data.frame(get.results(myLHS)) #Results in data frame
 res3  <- df1[colSums(!is.na(df1)) > 0] # Removing the NA in data frame
-#res5<-replace(res3$V255,res3$V255<0,0) #replaces the negetive values with NA's
-#res3$V255 = res5
 head(res3)
 
-
-
-head(myLHS)
-
+#Scatterplot
 pdf(file="Scatterplot_Geese_255.pdf",width=10,height=10)
 plotscatter(myLHS,index.res=c(255),index.data=c(1,2,3,13,14,15,16,21,22),pch=19,cex.axis=1.15,cex.lab=1.15)
 dev.off()
 
-
-plotcv(myLHS,index.res=c(255))
-dev.off()
-str(myLHS)
-prcc(myLHS)
-myLHS
-
+#Partial rank coefficients
 pdf(file="PRCC_Geese_400.pdf")
 plotprcc(myLHS, index.res=c(255),ylab="Partial correlation coefficient")
 dev.off()
 
 # plot influential parameters
 df = cbind(res3,dfdata)
-head(df)
 
-new <- data.frame(hr=c(20,30))
-predict(lm(V255 ~ hr,data=df), new)
-
-
-new <- data.frame(phi=c(0.4,0.6))
-predict(lm(V255 ~ phi,data=df), new)
-
-new <- data.frame(s=c(60,90))
-predict(lm(V255 ~ s,data=df), new)
-
-new <- data.frame(f23=c(0.02,0.03))
-predict(lm(V255 ~ f23,data=df), new)
-
-
-
-
-
-
-
-
-
-
+#Home range size
 plot(df$hr,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Home range size (hr; km2)")
+abline(lm(V255~hr,data=df),lwd=4)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-head(df)
-df$hr
-library(MASS)
-mod1=nls(V255~hr,data=df)
-summary(mod1)
-
-mod1=lm(V255~hr,data=df)
-summary(mod1)
-
-plot(mod1)
-confint(mod1)
-plot(df$hr,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Home range size (hr; km2)")
-abline(lm(V400~hr,data=df))
-text(x=45,y=11.5,"= -0.13")
-
-plot(df$phi,df$V400)
-abline(lm(V400~phi,data=df))
-lm(V400~phi,data=df)
-text(x=45,y=11.5,"= -0.13")
+#Phi
+plot(df$phi,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Phi")
+abline(lm(V255~phi,data=df),lwd=4)
 
 # W
-mod1=lm(V255~w,data=df)
-summary(mod1)
-plot(mod1)
-confint(mod1)
-plot(df$w,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Home range size (hr; km2)")
-abline(lm(V350~w,data=df))
-text(x=45,y=11.5,"= -0.13")
+plot(df$w,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="w")
+abline(lm(V255~w,data=df),lwd=4)
 
 # s
-mod1=lm(V350~s,data=df)
-summary(mod1)
-plot(mod1)
-confint(mod1)
-plot(df$s,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Home range size (hr; km2)")
-abline(lm(V350~s,data=df))
-text(x=45,y=11.5,"= -0.13")
+plot(df$s,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="s")
+abline(lm(V255~s,data=df))
 
+# detection probability
+plot(df$f22_ua,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="f22_ua")
+abline(lm(V255~f22_ua,data=df),lwd=4)
 
-# s
-mod1=lm(V350~phi,data=df)
-summary(mod1)
-confint(mod1)
-plot(df$phi,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Home range size (hr; km2)")
-abline(lm(V350~phi,data=df))
+# attack probability
+plot(df$f32_a,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="f32_ua")
+abline(lm(V255~f32_a,data=df),lwd=4)
 
+# Pursue time prey 2
+plot(df$Tp2,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Tp2")
+abline(lm(V255~Tp2,data=df),lwd=4)
 
-# s
-mod1=lm(V350~Tm2,data=df)
-summary(mod1)
-plot(mod1)
-confint(mod1)
-plot(df$Tm2,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Home range size (hr; km2)")
-abline(lm(V255~Tm2,data=df))
+# Manipulation time prey 2
+plot(df$Tm2,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Tm2")
+abline(lm(V255~Tm2,data=df),lwd=4)
 
-# -------------------------------------------------------
-#  FUNCTIONS
-# -------------------------------------------------------
-# fct to compute the acquisition rate at each day
-MSFR_3 <- function(N1,N2,N3,Tp1,Tm1,f41,Tp2,Tm2,f42_ua,f42_a,p_c_ua,p_c_a,w,Tm3) {
-  phi = phi_N1_concav(N1) #phi depends on N1 density
-  s = s_N1_concav(N1) # value of s depends on N1 density
-  alpha_1=s*(2*d1)*f21_f31*f41
-  alpha_3=s*(2*d3)*f23
-  alpha_2a_complete = s*f32_a*(2*d2_a)*f42_a*p_c_a #Capture rate of a nest by a predator - COMPLETE
-  alpha_2a_partial = (s*f32_a*(2*d2_a)*f42_a*(1-p_c_a))/3.7 #Capture rate of a nest by a predator - PARTIAL
-  alpha_2a = alpha_2a_complete + alpha_2a_partial # Predation totale
-  alpha_2ua_complete = s*f22_ua*(2*d2_ua)*p_c_ua*f42_ua #Capture rate of a nest by a predator - COMPLETE
-  alpha_2ua_partial = (s*f22_ua*(2*d2_ua)*f42_ua*(1-p_c_ua))/3.7 #Capture rate of a nest by a predator - PARTIAL
-  alpha_2ua = alpha_2ua_complete + alpha_2ua_partial # Predation totale
-
-  h_1=  Tp1 + Tm1 #(tcl/pl) + ((tel * el) + (tol * ol) + (tdl*dlp))
-  h_2ua= Tp2 + Tm2 #tc_ua + tmg *************** TC a corriger
-  h_2a= Tp2 + Tm2 #tc_a + tmg *************** TC a corriger
-  h_3= Tm3
-
-  AR3 <- (alpha_3 * N3 * phi)/(1+(alpha_1 * h_1 * N1) + (alpha_3 * h_3* N3)
-      + (alpha_2ua * h_2ua* (w*N2)) + (alpha_2a * h_2a* ((1-w)*N2)))
-  AR1 <- (alpha_1 * N1 * phi)/(1+(alpha_1 * h_1 * N1) + (alpha_3 * h_3* N3)
-      + (alpha_2ua * h_2ua* (w*N2)) + (alpha_2a * h_2a* ((1-w)*N2)))
-  AR2a <- (alpha_2a * ((1-w)*N2) * phi)/(1+(alpha_1 * h_1 * N1) + (alpha_3 * h_3* N3)
-        + (alpha_2ua * h_2ua* (w*N2)) + (alpha_2a * h_2a* ((1-w)*N2)))
-  AR2ua <- (alpha_2ua * (w*N2) * phi)/(1+(alpha_1 * h_1 * N1) + (alpha_3 * h_3* N3)
-        + (alpha_2ua * h_2ua* (w*N2)) + (alpha_2a * h_2a* ((1-w)*N2)))
-  ARg=AR2a+AR2ua
-  return(AR3)
-}
-
-# fct to compute the acquisition rate at each day
-MSFR_2 <- function(N1,N2,N3,Tp1,Tm1,f41,Tp2,Tm2,f42_ua,f42_a,p_c_ua,p_c_a,w,Tm3) {
-  phi = phi_N1_concav(N1) #phi depends on N1 density
-  s = s_N1_concav(N1) # value of s depends on N1 density
-  alpha_1=s*(2*d1)*f21_f31*f41
-  alpha_3=s*(2*d3)*f23
-  alpha_2a_complete = s*f32_a*(2*d2_a)*f42_a*p_c_a #Capture rate of a nest by a predator - COMPLETE
-  alpha_2a_partial = (s*f32_a*(2*d2_a)*f42_a*(1-p_c_a))/3.7 #Capture rate of a nest by a predator - PARTIAL
-  alpha_2a = alpha_2a_complete + alpha_2a_partial # Predation totale
-  alpha_2ua_complete = s*f22_ua*(2*d2_ua)*p_c_ua*f42_ua #Capture rate of a nest by a predator - COMPLETE
-  alpha_2ua_partial = (s*f22_ua*(2*d2_ua)*f42_ua*(1-p_c_ua))/3.7 #Capture rate of a nest by a predator - PARTIAL
-  alpha_2ua = alpha_2ua_complete + alpha_2ua_partial # Predation totale
-
-  h_1=  Tp1 + Tm1 #(tcl/pl) + ((tel * el) + (tol * ol) + (tdl*dlp))
-  h_2ua= Tp2 + Tm2 #tc_ua + tmg *************** TC a corriger
-  h_2a= Tp2 + Tm2 #tc_a + tmg *************** TC a corriger
-  h_3= Tm3
-
-  AR3 <- (alpha_3 * N3 * phi)/(1+(alpha_1 * h_1 * N1) + (alpha_3 * h_3* N3)
-      + (alpha_2ua * h_2ua* (w*N2)) + (alpha_2a * h_2a* ((1-w)*N2)))
-  AR1 <- (alpha_1 * N1 * phi)/(1+(alpha_1 * h_1 * N1) + (alpha_3 * h_3* N3)
-      + (alpha_2ua * h_2ua* (w*N2)) + (alpha_2a * h_2a* ((1-w)*N2)))
-  AR2a <- (alpha_2a * ((1-w)*N2) * phi)/(1+(alpha_1 * h_1 * N1) + (alpha_3 * h_3* N3)
-        + (alpha_2ua * h_2ua* (w*N2)) + (alpha_2a * h_2a* ((1-w)*N2)))
-  AR2ua <- (alpha_2ua * (w*N2) * phi)/(1+(alpha_1 * h_1 * N1) + (alpha_3 * h_3* N3)
-        + (alpha_2ua * h_2ua* (w*N2)) + (alpha_2a * h_2a* ((1-w)*N2)))
-  AR2 = AR2a+AR2ua
-  return(AR2)
-}
+# Detection probability prey 3
+plot(df$f23,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="f23")
+abline(lm(V255~f23,data=df),lwd=4)
+dev.off()
