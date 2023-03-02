@@ -44,7 +44,7 @@ fn_clutch <- function(p4, p3e, p2e, p1e){
 #Code for producing BOXPLOT in figure 3B2:
 #############################################################
 NS_range=c(0.459, 0.383,0.566,0.633) #Average nesting success for the different combinaisons (numerical response only, functional response only, absence of geese and combined effects)
-pnestm_range <- seq(0.8,1,by=0.05)# Nesting probability range
+pnestm_range <- seq(0.8,0.95,by=0.05)# Nesting probability range
 as_range = seq(0.722,0.798, by=0.01) # adult survival range
 
 grid = expand.grid(NS = NS_range, as= as_range,pnestm=pnestm_range)
@@ -80,6 +80,7 @@ colnames(sims) <- c("Lambda","NS","AS")
 
 sims$fact = cut(sims$NS,4, labels=c(3,4,1,2))
 sims$fact=as.numeric(as.character(sims$fact))
+
 
 group_median <- aggregate(sims$Lambda, list(sims$fact), median)
 

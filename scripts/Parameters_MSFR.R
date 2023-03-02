@@ -1,7 +1,7 @@
 #--------------------------------------------------------------------
 # MSFR parameters
 #--------------------------------------------------------------------
-s=41 #Daily distance traveled - km/day
+s=93 #Daily distance traveled - km/day
 phi=0.5#Average proportion of time the predator spend active in a day
 
 # Lemmings
