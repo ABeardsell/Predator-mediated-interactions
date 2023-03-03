@@ -41,6 +41,73 @@ fn_clutch <- function(p4, p3e, p2e, p1e){
 
 ################################################################################
 # deterministic simulation
+#Code for producing NEWPLOT
+#############################################################
+ave_NS_G <- read.csv("data/ave_NS_G.csv",sep=",")
+NS = ave_NS_G$NS
+NS
+
+ave_NS_NoG <- read.csv("data/ave_NS_noG.csv",sep=",")
+NS = ave_NS_NoG$NS
+
+NS_range=c(0.363,0.44,0.555,0.624)
+NS_range= NS #Average nesting success
+pnestm_range <- 0.9#seq(0.8,0.95,by=0.05)# Nesting probability range
+as_range = 0.76#seq(0.722,0.798, by=0.01) # adult survival range
+
+grid = expand.grid(NS = NS_range, as= as_range,pnestm=pnestm_range)
+Out <- list()
+  for (k in seq_along(grid$NS)){
+
+    fn1 <- grid$pnestm[k]*(grid$NS[k])*
+      (fn_clutch(p4e1, p3e, p2e, p1e)*phatch)*
+      csurv1*sexr
+    fn2 <- grid$pnestm[k]*(1 - (grid$NS[k]))*prnestm*(grid$NS[k])*
+      (fn_clutch(p4e2, p3e, p2e, p1e)*
+      phatch)*csurv2*sexr
+
+      # Multiply by the probability of returning at each age to calculate the
+      # number of male fledglings produced per male in the whole population:
+			F1 <- sJuv * pbreed1*(fn1 + fn2)
+			F2 <- grid$as[k] * pbreed2*(fn1 + fn2)
+			F3 <- grid$as[k] * pbreed3*(fn1 + fn2)
+
+			# Set up the transition matrix:
+				mat <- matrix( c(
+					F1, F2, F3,
+					sJuv, 0, 0,
+					0, grid$as[k], grid$as[k]), nrow=3, ncol=3, byrow=TRUE)
+
+        Out[[k]] <- lambda(mat)
+      }
+
+sims_NoG <- do.call(rbind,Out)
+sims_NoG <- as.data.frame(cbind(sims_NoG, grid$NS,grid$as,ave_NS_NoG$HR))
+colnames(sims_NoG) <- c("Lambda","NS","AS","HR")
+sims_NoG
+
+sims <- do.call(rbind,Out)
+sims <- as.data.frame(cbind(sims, grid$NS,grid$as,ave_NS_G$HR))
+colnames(sims) <- c("Lambda","NS","AS","HR")
+sims
+
+out2 <- do.call(rbind,Out)
+out2 <- as.data.frame(cbind(out2, grid$NS,grid$as))
+colnames(out2) <- c("Lambda","NS","AS")
+out2
+
+plot(sims$HR,sims$Lambda,ylim=c(0.7,1.1),xlim=c(0,50),bty="n",lwd=3,type="l",col="black",lty=3,ylab="Sandpiper population growth rate", xlab="Fox home range size (km2)",cex.lab=1.4)
+lines(sims_NoG$HR,sims_NoG$Lambda,col="black",lwd=3)
+points(10.81,0.968,bg="#d7191cff",pch=22,lwd=3,cex=1.4) #combined effect
+points(18.2,1.038,bg="#fee090ff",pch=21,lwd=3,cex=1.4) # FR only
+points(10.81,0.936,bg="#f46d43ff",pch=21,lwd=3,cex=1.4) #NR only
+points(18.2,1.012, bg="#68a0d9ff",pch=21,lwd=3,cex=1.4) #Absence
+abline(h=1,lty=3,lwd=2)#
+dev.copy2pdf(file="Lambda_Hr.pdf")
+dev.off()
+
+################################################################################
+# deterministic simulation
 #Code for producing BOXPLOT in figure 3B2:
 #############################################################
 NS_range=c(0.459, 0.383,0.566,0.633) #Average nesting success for the different combinaisons (numerical response only, functional response only, absence of geese and combined effects)
