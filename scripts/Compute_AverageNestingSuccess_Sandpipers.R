@@ -8,17 +8,15 @@ source("scripts/Parameters_MSFR.R")
 
 # Function to compute the number of predators
 NR_sim<- function (hr) {
-  area = 50 #spatial scale - outside or inside the goose colony
   overlap = 0.18 # fox home range overlap
-  y = (area/(hr*(1-overlap))) * 2
+  Nb_p= 2 #number of predators in H_o
+  H_o = (hr*(1-overlap))
+  y = (Nb_p/H_o)
   return(y)
 }
 
 #Plot Functional response of prey 3 to prey 1 and prey 2 densities
 N3=(0:7)
-
-plot(MSFRp_g(204,255,N3)~N3,ylim=c(0,1),type="l",lwd=4,col="dodgerblue4",bty="n")
-lines(MSFRp_g(204,0,N3)~N3,lwd=4)
 
 # FR
 plot(MSFRp_g(700,0,N3)~N3,ylim=c(0,2),type="l",lwd=4,col="black",bty="n",lty=3,ylab="Number of nests predated per fox per day")
@@ -27,60 +25,45 @@ lines(MSFRp_g(0,255,N3)~N3,lwd=4,col="firebrick")
 lines(MSFRp_g(700,255,N3)~N3,lwd=4,col="firebrick",lty=3)
 
 # FR x NR
-plot(MSFRp_g(700,0,N3)*NR_sim(18.2)~N3,ylim=c(0,14),type="l",lwd=4,col="black",bty="n",lty=3,ylab="Total number of sandpiper nests predated within 50km2 per day")
+plot(MSFRp_g(700,0,N3)*NR_sim(18.2)~N3,ylim=c(0,0.5),type="l",lwd=4,col="black",bty="n",lty=3,ylab="Total number of sandpiper nests predated per km2 per day")
 lines(MSFRp_g(0,0,N3)*NR_sim(18.2)~N3,lwd=4,col="black")
 lines(MSFRp_g(0,255,N3)*NR_sim(10.8)~N3,lwd=4,col="firebrick")
 lines(MSFRp_g(700,255,N3)*NR_sim(10.8)~N3,lwd=4,col="firebrick",lty=3)
 
+dev.copy2pdf(file="FR_sandpipers_densityN2_N3.pdf")
+dev.off()
 # -------------------------------------------------------
 days <- c(1:24) #Compute average predation rate on the bird incubation period (24 days)
 
 # fct to compute the decreasing of goose nest density in 24 days
-dec_gdensity_in <- function(t,state,parameters)
+Ave_pred_N2<- function(t,state,parameters)
      {with(as.list(c(t,state,parameters)),{  # unpack the parameters
               dAR2 <- MSFRg_g(N1,N2,N3) * NR_sim(hr)
-              dN2 <- - dAR2/plot_size
+              dN2 <- - dAR2
         list(c(dN2,dAR2),
             c(N1=N1,N3=N3))
         })}
 
 state_2d= c(N2=255,AR2=MSFRg_g(204,255,3.1)*NR_sim(10.8))
-output_2d <- data.frame(ode(y=state_2d,times=days,func=dec_gdensity_in,parms=c(N1=204,N3=3.1,hr=10.8, plot_size=50, n_max_2=50*N2,n_max_3=50*N3)))
+output_2d <- data.frame(ode(y=state_2d,times=days,func=Ave_pred_N2,parms=c(N1=204,N3=3.1,hr=10.8)))
 output_2d
-
-# TEST TEST TEST TEST TESTTEST TEST TEST TEST TESTTEST TEST TEST TEST TEST
-dec_gdensity_in <- function(t,state,parameters)
-     {with(as.list(c(t,state,parameters)),{  # unpack the parameters
-              dAR2 <- MSFRg_g(N1,N2,N3) * NR_sim(hr)
-              dAR3 <- MSFRp_g(N1,N2,N3) * NR_sim(hr)
-              dN2 <- - dAR2/plot_size
-              dN3 <- - dAR3/plot_size
-        list(c(dN2,dAR2,dAR3,dN3),
-            c(N1=N1))
-        })}
-
-state_2d= c(N2=255,N3=3,AR2=MSFRg_g(204,255,3.1)*NR_sim(10.8),AR3=MSFRp_g(204,255,3.1)*NR_sim(10.8))
-output_2d <- data.frame(ode(y=state_2d,times=days,func=dec_gdensity_in,parms=c(N1=204,hr=10.8, plot_size=50)))
-output_2d
-#(MSFRp_g(204,255,3.1) * NR_sim(10.8))/50
-# TEST TEST TEST TEST TESTTEST TEST TEST TEST TESTTEST TEST TEST TEST TEST
 
 # fct to compute the average predation rate after 24 days
-Ave_pred_ing <- function(t,state,parameters)
+Ave_pred_N3 <- function(t,state,parameters)
  {with(as.list(c(t,state,parameters)),{  # unpack the parameters
     #N2 = N2_den(t)
     dAR3 <- MSFRp_g(N1,N2,N3) * NR_sim(hr)
-    dN3 <- - dAR3/plot_size
+    dN3 <- - dAR3
     list(c(dN3,dAR3),
         c(N1=N1,N2=N2))
     })}
-  state_2d= c(N3=3.1,AR3=MSFRp_g(204,255,3.1)*NR_sim(10.8))
-  output_2d <- data.frame(ode(y=state_2d,times=days,func=Ave_pred_ing,parms=c(N1=204,N2=255,hr=10.8, plot_size=50)))
-  output_2d
+#state_2d= c(N3=3.1,AR3=MSFRp_g(204,255,3.1)*NR_sim(10.8))
+#output_2d <- data.frame(ode(y=state_2d,times=days,func=Ave_pred_N3,parms=c(N1=204,N2=255,hr=10.8)))
+
 #------------------------------------------------------------------------------------------------------
 # ---- Goose nests and lemming densities fct of Home range size - Effects on predation rate -----------
 #------------------------------------------------------------------------------------------------------
-N2_range = c(0)
+N2_range = c(255)
 N1_range_1 = c(42,281,14,384,504,9,2,648,365,253,19,1.6,137) #empirical lemmings densities from 2007 to 2019
 #N1_range_2 = c(204,204,204,204,204,204,204,204,204,204,204,204,204)
 #N1_range_3 = c(1,322,14,500,504,9,2,648,10,600,19,1.6,20)
@@ -88,15 +71,15 @@ N1_range_1 = c(42,281,14,384,504,9,2,648,365,253,19,1.6,137) #empirical lemmings
 hr_range = seq(3.75,25.1,by=0.5) #Range in the presence of a goose colony
 hr_range = seq(6.5,48.5,by=0.5) #Range in the absence of a goose colony
 #hr_range = seq(3.75,48.5,by=4.5) #Complete range
-#hr_range=c(10.8,18.2)
+hr_range=c(10.8,18.2)
 d_grid = expand.grid(N1_vec = N1_range_1, N3_vec = 3.1, N2_vec= N2_range,hr_vec=hr_range)
 
 Out <- list()
   for (k in seq_along(d_grid$N3_vec)){
               state_2d= c(N2=d_grid$N2_vec[k],AR2=MSFRg_g(d_grid$N1_vec[k],d_grid$N2_vec[k],d_grid$N3_vec[k])
               *NR_sim(d_grid$hr_vec[k]))
-              output_2d <- data.frame(ode(y=state_2d,times=days,func=dec_gdensity_in,parms=c(N1=d_grid$N1_vec[k],
-              N3=d_grid$N3_vec[k],hr=d_grid$hr_vec[k], plot_size=50)))
+              output_2d <- data.frame(ode(y=state_2d,times=days,func=Ave_pred_N2,parms=c(N1=d_grid$N1_vec[k],
+              N3=d_grid$N3_vec[k],hr=d_grid$hr_vec[k])))
               N2_density=output_2d$N2
               # Forcing fct for goose nest density
               N2_den <- approxfun(days,N2_density,rule=2)
@@ -104,8 +87,8 @@ Out <- list()
               state<-c(N3=d_grid$N3_vec[k],AR3 = MSFRp_g(d_grid$N1_vec[k],d_grid$N2_vec[k],d_grid$N3_vec[k])
               *NR_sim(d_grid$hr_vec[k]))
               days <- c(1:24)
-              output <- data.frame(ode(y=state,times=days,func=Ave_pred_ing,parms=c(N1=d_grid$N1_vec[k], N2=d_grid$N2_vec[k],hr=d_grid$hr_vec[k], plot_size=50)))
-              n_max_3=d_grid$N3_vec[k] * 50
+              output <- data.frame(ode(y=state,times=days,func=Ave_pred_N3,parms=c(N1=d_grid$N1_vec[k], N2=d_grid$N2_vec[k],hr=d_grid$hr_vec[k])))
+              n_max_3=d_grid$N3_vec[k]
               pred_out <- output[24,]$AR3/n_max_3 # predation rate/fox after 24 days
               Out[[k]] <- c(pred_out,d_grid$N1_vec[k],d_grid$N2_vec[k],d_grid$N3_vec[k],d_grid$hr_vec[k])
           }
