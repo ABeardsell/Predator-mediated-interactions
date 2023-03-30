@@ -15,6 +15,17 @@ NR_sim<- function (hr) {
   return(y)
 }
 
+NR_sim<- function (hr) {
+  overlap = 0.18 # fox home range overlap
+  Nb_p= 2 #number of predators in H_o
+  y = (1 + overlap) * Nb_p/hr
+  return(y)
+}
+hr_range = seq(3.75,25.1,by=0.5) #Range in the presence of a goose colony
+
+NR_sim(hr_range)
+NR_sim2(hr_range)
+
 #Plot Functional response of prey 3 to prey 1 and prey 2 densities
 N3=(0:7)
 
@@ -23,15 +34,64 @@ plot(MSFRp_g(700,0,N3)~N3,ylim=c(0,2),type="l",lwd=4,col="black",bty="n",lty=3,y
 lines(MSFRp_g(0,0,N3)~N3,lwd=4,col="black")
 lines(MSFRp_g(0,255,N3)~N3,lwd=4,col="firebrick")
 lines(MSFRp_g(700,255,N3)~N3,lwd=4,col="firebrick",lty=3)
-
+dev.copy2pdf(file="FR_sandpipers_densityN2_N3.pdf")
+dev.off()
 # FR x NR
-plot(MSFRp_g(700,0,N3)*NR_sim(18.2)~N3,ylim=c(0,0.5),type="l",lwd=4,col="black",bty="n",lty=3,ylab="Total number of sandpiper nests predated per km2 per day")
+plot(MSFRp_g(700,0,N3)*NR_sim(18.2)~N3,ylim=c(0,0.4),type="l",lwd=4,col="black",bty="n",lty=3,ylab="Total number of sandpiper nests predated per km2 per day")
 lines(MSFRp_g(0,0,N3)*NR_sim(18.2)~N3,lwd=4,col="black")
 lines(MSFRp_g(0,255,N3)*NR_sim(10.8)~N3,lwd=4,col="firebrick")
 lines(MSFRp_g(700,255,N3)*NR_sim(10.8)~N3,lwd=4,col="firebrick",lty=3)
 
-dev.copy2pdf(file="FR_sandpipers_densityN2_N3.pdf")
+dev.copy2pdf(file="FRNR_sandpipers_densityN2_N3.pdf")
 dev.off()
+
+
+#N1
+N3=(3.1)
+N1=(1:700)
+
+plot(MSFRp_g(N1,0,N3)*NR_sim(18.2)~N1,ylim=c(0,0.2),type="l",lwd=4,col="black",bty="n",lty=3,ylab="Total number of sandpiper nests predated per km2 per day")
+lines(MSFRp_g(N1,255,N3)*NR_sim(10.8)~N1,lwd=4,col="firebrick")
+
+dev.copy2pdf(file="FRNR_sandpipers_densityN2_N3.pdf")
+dev.off()
+
+plot(MSFRp_g(N1,0,N3)~N1,ylim=c(0,1),type="l",lwd=4,col="black",bty="n",lty=3,ylab="Number of nests predated per fox per day")
+lines(MSFRp_g(N1,255,N3)~N1,lwd=4,col="firebrick")
+dev.copy2pdf(file="FRNR_sandpipers_densityN2_N3.pdf")
+dev.off()
+
+#N2
+N2=(1:300)
+
+plot(MSFRp_g(0,N2,N3)~N2,ylim=c(0,1),type="l",lwd=4,col="black",bty="n",lty=3,ylab="Number of nests predated per fox per day")
+lines(MSFRp_g(700,N2,N3)~N2,lwd=4,col="firebrick")
+dev.copy2pdf(file="FRN3_N2.pdf")
+dev.off()
+
+hr_range0 = c(6.5,18.2,48.5) #Range in the presence of a goose colony
+hr_range255 = c(3.75,10.8,25.1) #Range in the absence of a goose colony
+
+hr0=MSFRp_g(204,0,3.1)*NR_sim(hr_range0)
+hr0=as.data.frame(hr0)
+hr0
+hr255=MSFRp_g(204,255,3.1)*NR_sim(hr_range255)
+hr255=as.data.frame(hr255)
+
+
+hrdf=cbind(hr0,hr255)
+hrdf$G0=c(0)
+hrdf$G255=c(255)
+
+hrdf
+boxplot(hrdf$G0,hrdf$hr0,ylim=c(0,0.25))
+dev.copy2pdf(file="1.pdf")
+dev.off()
+boxplot(hrdf$G255,hrdf$hr255,ylim=c(0,0.25))
+dev.copy2pdf(file="N2.pdf")
+dev.off()
+
+
 # -------------------------------------------------------
 days <- c(1:24) #Compute average predation rate on the bird incubation period (24 days)
 
@@ -44,9 +104,9 @@ Ave_pred_N2<- function(t,state,parameters)
             c(N1=N1,N3=N3))
         })}
 
-state_2d= c(N2=255,AR2=MSFRg_g(204,255,3.1)*NR_sim(10.8))
-output_2d <- data.frame(ode(y=state_2d,times=days,func=Ave_pred_N2,parms=c(N1=204,N3=3.1,hr=10.8)))
-output_2d
+#state_2d= c(N2=255,AR2=MSFRg_g(204,255,3.1)*NR_sim(10.8))
+#output_2d <- data.frame(ode(y=state_2d,times=days,func=Ave_pred_N2,parms=c(N1=204,N3=3.1,hr=10.8)))
+#output_2d
 
 # fct to compute the average predation rate after 24 days
 Ave_pred_N3 <- function(t,state,parameters)
@@ -63,14 +123,15 @@ Ave_pred_N3 <- function(t,state,parameters)
 #------------------------------------------------------------------------------------------------------
 # ---- Goose nests and lemming densities fct of Home range size - Effects on predation rate -----------
 #------------------------------------------------------------------------------------------------------
-N2_range = c(255)
+N2_range = c(0)
+N1_range_1=203
 N1_range_1 = c(42,281,14,384,504,9,2,648,365,253,19,1.6,137) #empirical lemmings densities from 2007 to 2019
 #N1_range_2 = c(204,204,204,204,204,204,204,204,204,204,204,204,204)
 #N1_range_3 = c(1,322,14,500,504,9,2,648,10,600,19,1.6,20)
 
 hr_range = seq(3.75,25.1,by=0.5) #Range in the presence of a goose colony
 hr_range = seq(6.5,48.5,by=0.5) #Range in the absence of a goose colony
-#hr_range = seq(3.75,48.5,by=4.5) #Complete range
+hr_range = seq(3.75,48.5,by=4.5) #Complete range
 hr_range=c(10.8,18.2)
 d_grid = expand.grid(N1_vec = N1_range_1, N3_vec = 3.1, N2_vec= N2_range,hr_vec=hr_range)
 
@@ -119,11 +180,12 @@ sce_G=ave_PR
 sce_noG = ave_PR
 sce_G
 
-sce_G$pred_density=NR_sim(sce_G$HR)/50
-sce_noG$pred_density=NR_sim(sce_noG$HR)/50
+sce_G$pred_density=NR_sim(sce_G$HR)
+sce_noG$pred_density=NR_sim(sce_noG$HR)
 #write.csv(sce_G,"data/ave_NS_G.csv", row.names = FALSE)
 #write.csv(sce_noG,"data/ave_NS_noG.csv", row.names = FALSE)
 
+plot(sce_G$HR,sce_G$pred_density,ylim=c(0,0.7))
 
 plot(sce_noG$pred_density,sce_noG$NS,ylim=c(0,1),xlim=c(0.05,0.4),bty="n",lwd=3,type="l",col="blue")
 lines(sce_G$pred_density,sce_G$NS,col="red",lwd=3)
@@ -168,4 +230,34 @@ plot(sce1$HR,sce1$NS,ylim=c(0,1),xlim=c(0,50),bty="n",lwd=3,type="l",col="blue")
 lines(sce2$HR,sce2$NS,col="lightgrey",lwd=3)
 lines(sce3$HR,sce3$NS,col="firebrick",lwd=3)
 dev.copy2pdf(file="NS_JensenInequality.pdf")
+dev.off()
+
+#### VIOLON PLOT##############################################################
+library(ggplot2)
+
+N2=c(0)
+hr_range = seq(3.75,25.1,by=0.5) #Range in the presence of a goose colony
+hr_range = seq(6.5,48.5,by=0.5) #Range in the absence of a goose colony
+
+d_grid = expand.grid(N1_vec = 204, N3_vec = 3.1, N2_vec= N2,hr_vec=hr_range)
+
+Out <- list()
+  for (k in seq_along(d_grid$N3_vec)){
+              AR3 = MSFRp_g(d_grid$N1_vec[k],d_grid$N2_vec[k],d_grid$N3_vec[k])*NR_sim(d_grid$hr_vec[k])
+              Out[[k]] <- c(AR3,d_grid$N1_vec[k],d_grid$N2_vec[k],d_grid$N3_vec[k],d_grid$hr_vec[k])
+          }
+
+df <- do.call(rbind,Out)
+df <- as.data.frame(df)
+colnames(df) <- c("PR","N1","N2","N3","HR")
+
+df_255=df
+df_0=df
+
+df = rbind(df_0,df_255)
+df$N2 = as.factor(as.character(df$N2))
+
+p <- ggplot(df, aes(x=N2, y=PR)) + geom_violin(trim=TRUE)
+p + stat_summary(fun.y=mean, geom="point", shape=23, size=2)
+dev.copy2pdf(file="Violon_Fig.S3.pdf")
 dev.off()

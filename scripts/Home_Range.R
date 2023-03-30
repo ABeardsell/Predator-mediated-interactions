@@ -16,10 +16,18 @@ summary(out_colony$area)
 length(out_colony$area)
 length(in_colony$area)
 
+length(in_colony$area)
+df_seuil = which(in_colony$area<13.5,)
+length(df_seuil)
+
+length(out_colony$area)
+
+df_seuil = which(out_colony$area>16,)
+length(df_seuil)
 ##------------------------------------------------------------------------
 # Plot DV and predator density Fig3A
 hr = c(3.75:48)
-pred_density=NR_sim(hr)/50
+pred_density=NR_sim(hr)
 
 plot(hr,pred_density,type="l",bty="n",xlim=c(0,50),ylim=c(0,0.7),lwd=4)
 abline(v=18.2)

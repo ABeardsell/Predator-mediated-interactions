@@ -25,6 +25,10 @@ phi_L_concav <- function(x) {
 0.40 + (0.53-0.40)* (exp(-x/180))
 }
 
+#N1= c(0:700)
+#plot(N1,s_L_concav(N1),type="l",lwd=4,bty="n",ylim=c(60,100))
+#plot(N1,phi_L_concav(N1),type="l",lwd=4,bty="n",ylim=c(0.35,0.55))
+
 # Sandpiper
 d3=0.085 #detection range - km
 f23=0.029 # detection probability

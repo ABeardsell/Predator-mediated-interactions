@@ -56,8 +56,14 @@ qdata_p_c_a <- function(p, data) quantile(x=p_c_a_dist, probs=p)
 ## Quantiles functions - LEMMINGS
 qdata_Tm3 <- function(p, data) quantile(x=Tm3_dist, probs=p)
 
-area = 70 #spatial scale - outside or inside the goose colony
-overlap = 0.18 # 2019: 7 HR in 52 km2 donc 7.4 km2 sans chevauchement - HR average 9.1 km2 - overlap=1-0.82
+NR_sim<- function (hr) {
+  overlap = 0.18 # fox home range overlap
+  Nb_p= 2 #number of predators in H_o
+  H_o = (hr*(1-overlap))
+  y = (Nb_p/H_o)
+  return(y)
+}
+
 d1=0.0075 #km
 d2_a=0.033 #km
 d2_ua=0.11 #km
@@ -81,9 +87,9 @@ list(data=Tm2_dist),list(data=f42_ua_dist),list(data=f42_a_dist),list(data=p_c_u
 mod_MSFR_global <- function (hr,phi,s,f21_f31,Tp1,Te1,e1,To1,o1,Tde1,de1,f41,f22_ua,f32_a,Tp2,Tm2,f42_ua,f42_a,p_c_ua,p_c_a,w,f23,Tm3){
     NS <- array();
     for(i in N2) {
-      N1=350
-      N3 = 3.5
-      Nb_renard = (area/(hr*(1-overlap))) * 2
+      N1=204
+      N3 = 3.1
+      Nb_renard = NR_sim(hr)
       alpha_1=s*(2*d1)*f21_f31*f41
       alpha_3=s*(2*d3)*f23
       alpha_2a_complete = s*f32_a*(2*d2_a)*f42_a*p_c_a #Capture rate of a nest by a predator - COMPLETE
@@ -102,7 +108,7 @@ mod_MSFR_global <- function (hr,phi,s,f21_f31,Tp1,Te1,e1,To1,o1,Tde1,de1,f41,f22
           + (alpha_2ua * h_2ua* ((1-w)*i)) + (alpha_2a * h_2a* (w*i)))
       PR <- AR3 * Nb_renard
       #NS[i] <- 1 - ((PR * 24)/(3.5*52))
-      NS[i] <- ifelse((1 - ((PR * 24)/(3.5*70)))>0, 1 - ((PR * 24)/(3.5*70)),0)
+      NS[i] <- ifelse((1 - ((PR * 24)/(3.5)))>0, 1 - ((PR * 24)/(3.5)),0)
     }
       return(NS)
   }
@@ -132,7 +138,7 @@ dev.off()
 pdf(file="PRCC_Geese_400.pdf")
 plotprcc(myLHS, index.res=c(255),ylab="Partial correlation coefficient")
 dev.off()
-
+head(df)
 # plot influential parameters
 df = cbind(res3,dfdata)
 
@@ -143,6 +149,10 @@ abline(lm(V255~hr,data=df),lwd=4)
 #Phi
 plot(df$phi,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Phi")
 abline(lm(V255~phi,data=df),lwd=4)
+
+#f21_f31
+plot(df$f21_f31,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Phi")
+abline(lm(V255~f21_f31,data=df),lwd=4)
 
 # W
 plot(df$w,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="w")
@@ -158,7 +168,11 @@ abline(lm(V255~f22_ua,data=df),lwd=4)
 
 # attack probability
 plot(df$f32_a,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="f32_ua")
-abline(lm(V255~f32_a,data=df),lwd=4)
+abline(lm(V255~f32_a,data=df),lwd=
+
+# pca
+plot(df$p_c_a,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Tp2")
+abline(lm(V255~p_c_a,data=df),lwd=4)
 
 # Pursue time prey 2
 plot(df$Tp2,df$V255,pch=19,cex.axis=1.15,ylab="",xlab="Tp2")

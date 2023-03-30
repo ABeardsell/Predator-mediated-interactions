@@ -52,7 +52,7 @@ NS = ave_NS_NoG$NS
 
 NS_range=c(0.363,0.44,0.555,0.624)
 NS_range= NS #Average nesting success
-pnestm_range <- 0.9#seq(0.8,0.95,by=0.05)# Nesting probability range
+pnestm_range <- 0.8#seq(0.8,0.95,by=0.05)# Nesting probability range
 as_range = 0.76#seq(0.722,0.798, by=0.01) # adult survival range
 
 grid = expand.grid(NS = NS_range, as= as_range,pnestm=pnestm_range)
