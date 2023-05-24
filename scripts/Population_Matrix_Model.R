@@ -45,16 +45,16 @@ fn_clutch <- function(p4, p3e, p2e, p1e){
 #############################################################
 ave_NS_G <- read.csv("data/ave_NS_G.csv",sep=",")
 NS = ave_NS_G$NS
-NS
 
 ave_NS_NoG <- read.csv("data/ave_NS_noG.csv",sep=",")
 NS = ave_NS_NoG$NS
 
-NS_range=c(0.363,0.44,0.555,0.624)
-NS_range= NS #Average nesting success
+NS_range=c(0.4613)
+#NS_range= NS #Average nesting success
 pnestm_range <- 0.8#seq(0.8,0.95,by=0.05)# Nesting probability range
-as_range = 0.76#seq(0.722,0.798, by=0.01) # adult survival range
-
+as_range = seq(0.70,0.80,by=0.01)#seq(0.722,0.798, by=0.01) # adult survival range
+as_range = seq(0.55,1,by=0.01)
+as_range
 grid = expand.grid(NS = NS_range, as= as_range,pnestm=pnestm_range)
 Out <- list()
   for (k in seq_along(grid$NS)){
@@ -84,17 +84,16 @@ Out <- list()
 sims_NoG <- do.call(rbind,Out)
 sims_NoG <- as.data.frame(cbind(sims_NoG, grid$NS,grid$as,ave_NS_NoG$HR))
 colnames(sims_NoG) <- c("Lambda","NS","AS","HR")
-sims_NoG
 
 sims <- do.call(rbind,Out)
+sims <- as.data.frame(cbind(sims, grid$NS,grid$as))
+
 sims <- as.data.frame(cbind(sims, grid$NS,grid$as,ave_NS_G$HR))
 colnames(sims) <- c("Lambda","NS","AS","HR")
-sims
 
 out2 <- do.call(rbind,Out)
 out2 <- as.data.frame(cbind(out2, grid$NS,grid$as))
 colnames(out2) <- c("Lambda","NS","AS")
-out2
 
 plot(sims$HR,sims$Lambda,ylim=c(0.7,1.1),xlim=c(0,50),bty="n",lwd=3,type="l",col="black",lty=3,ylab="Sandpiper population growth rate", xlab="Fox home range size (km2)",cex.lab=1.4)
 lines(sims_NoG$HR,sims_NoG$Lambda,col="black",lwd=3)
@@ -161,9 +160,9 @@ dev.off()
 ##############################################################
 #Code for producing PLOT for figure S6
 #############################################################
-ave_PR <- read.csv("data/ave_PR.csv")
+ave_PR <- read.csv("data/ave_NS_G.csv",sep=",")
 ave_PR$NS=1-(ave_PR$PR) #Nesting success for different values of home range
-
+ave_PR
 as_range = seq(0.5,0.95,by=0.05) # adult survival range
 NS_range = ave_PR$NS
 pnestm_range = 0.8 #probability of nesting in a given year
@@ -196,11 +195,13 @@ sims <- do.call(rbind,Out)
 sims <- as.data.frame(cbind(sims, grid$NS,grid$as))
 final = cbind(ave_PR$HR,sims)
 colnames(final) = c("HR","L","NS","AS")
-
+final
 #PLOT For Lambda<1
-ggplot(final, aes(HR,AS, fill=L)) + geom_tile() + scale_fill_distiller(limits = c(0.55,1),palette = "OrRd",direction=-1)+
+sims
+ggplot(final, aes(HR,AS, fill=L)) + geom_tile() + scale_fill_distiller(limits = c(0.52,1),palette = "OrRd",direction=-1)+
 theme_bw() +
 geom_hline(yintercept=0.76)+
+geom_hline(yintercept=0.78)+
 geom_vline(xintercept=10.8)+
 coord_cartesian(xlim = c(2.5,47.5)) +
 scale_x_continuous(breaks = seq(2.5,47.5, by = 7.5)) +
@@ -234,11 +235,13 @@ scale_x_continuous(breaks = seq(2.5,47.5, by = 7.5)) +
     dev.copy2pdf(file="HR_AS_L_increaseG350.pdf")
     dev.off()
 
-# Addind predator density in x axis
+# Adding predator density in x axis
+# Function to compute the number of predators
 NR_sim<- function (hr) {
-  area = 50 #spatial scale - outside or inside the goose colony
-  overlap = 0.18 # 2019: 7 HR in 52 km2 donc 7.4 km2 sans chevauchement - HR average 9.1 km2 - overlap=1-0.82
-  y = (area/(hr*(1-overlap))) * 2
+  overlap = 0.18 # fox home range overlap
+  Nb_p= 2 #number of predators in H_o
+  H_o = (hr*(1-overlap))
+  y = (Nb_p/H_o)
   return(y)
 }
 final$pred_density=NR_sim(final$HR)/50

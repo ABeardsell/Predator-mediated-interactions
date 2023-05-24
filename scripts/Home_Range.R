@@ -21,12 +21,20 @@ df_seuil = which(in_colony$area<13.5,)
 length(df_seuil)
 
 length(out_colony$area)
-
 df_seuil = which(out_colony$area>16,)
 length(df_seuil)
 ##------------------------------------------------------------------------
 # Plot DV and predator density Fig3A
 hr = c(3.75:48)
+
+# Function to compute the number of predators
+NR_sim<- function (hr) {
+  overlap = 0.18 # fox home range overlap
+  Nb_p= 2 #number of predators in H_o
+  H_o = (hr*(1-overlap))
+  y = (Nb_p/H_o)
+  return(y)
+}
 pred_density=NR_sim(hr)
 
 plot(hr,pred_density,type="l",bty="n",xlim=c(0,50),ylim=c(0,0.7),lwd=4)

@@ -1,3 +1,13 @@
+
+# Function to compute the number of predators
+NR_sim<- function (hr) {
+  overlap = 0.18 # fox home range overlap
+  Nb_p= 2 #number of predators in H_o
+  H_o = (hr*(1-overlap))
+  y = (Nb_p/H_o)
+  return(y)
+}
+
 #--------------------------------------------------------------------
 # MSFR parameters
 #--------------------------------------------------------------------

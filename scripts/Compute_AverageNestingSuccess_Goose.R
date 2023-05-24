@@ -4,19 +4,10 @@ library(deSolve)
 library(ggplot2)
 
 # Load parameters and dd fcts
-source("scripts/Parameters_MSFR.R")
+source("scripts/Parameters_MSFR_NR.R")
 
 # general variable
 days <- c(1:28) #Compute average predation rate on the bird incubation period (24 days) + laying 4 days
-
-# Function to compute the number of predators
-NR_sim<- function (hr) {
-  overlap = 0.18 # fox home range overlap
-  Nb_p= 2 #number of predators in H_o
-  H_o = (hr*(1-overlap))
-  y = Nb_p/H_o
-  return(y)
-}
 
 # -------------------------------------------------------
 # -------------------------------------------------------
