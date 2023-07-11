@@ -1,3 +1,4 @@
+#Figure S2 Empirical time series of lemming density on Bylot Island from 2007 to 2019 measured by live-trapping (see methods in Fauteux et al. 2018). The density of brown and collared lemmings was summed.
 N1_range = c(42,281,14,384,504,9,2,648,365,253,19,1.6,137) #2007 à 2019
 year_l = c(2007:2019)
 

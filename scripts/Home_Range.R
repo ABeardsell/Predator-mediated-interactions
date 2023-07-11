@@ -7,7 +7,6 @@ df = df[which(df$goose_category!="outside with overlap"),]#Remove HR overlapping
 df$goose_category = as.factor(df$goose_category)
 
 df$area = df$area * 0.7 #correction ARGOS - See Christin et al. 2015 PlOs One
-
 in_colony = df[which(df$goose_category=="inside colony",),]
 out_colony= df[which(df$goose_category=="outside colony",),]
 
@@ -16,13 +15,6 @@ summary(out_colony$area)
 length(out_colony$area)
 length(in_colony$area)
 
-length(in_colony$area)
-df_seuil = which(in_colony$area<13.5,)
-length(df_seuil)
-
-length(out_colony$area)
-df_seuil = which(out_colony$area>16,)
-length(df_seuil)
 ##------------------------------------------------------------------------
 # Plot DV and predator density Fig3A
 hr = c(3.75:48)
